@@ -11,8 +11,13 @@ import time
 # * https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/reference/ASLR_cmds.html#//apple_ref/doc/uid/TP40000983-CH216-SW224
 # 
 
-toggle_dnd = 'osascript -e "tell application \\"System Events\\" to keystroke \\"d\\" using {command down, option down, control down}"'
-os.system(toggle_dnd)
+# this doesn't work w/out the shortcut and w/out permissions; trying this approach instead:  https://apple.stackexchange.com/a/303400/334289
+# toggle_dnd = 'osascript -e "tell application \\"System Events\\" to keystroke \\"d\\" using {command down, option down, control down}"'
+# os.system(toggle_dnd)
+
+os.system('defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true')
+os.system('defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturbDate -date "`date -u +\"%Y-%m-%d %H:%M:%S +0000\"`"')
+os.system('killall NotificationCenter')
 
 pomodoro_length = 25 
 
@@ -29,4 +34,6 @@ print(f'DND is enabled; sleeping for {minutes} minutes...')
 time.sleep(minutes_to_sleep)
 
 print('Waking up & switching off DND')
-os.system(toggle_dnd)
+# os.system(toggle_dnd)
+os.system('defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false')
+os.system('killall NotificationCenter')
