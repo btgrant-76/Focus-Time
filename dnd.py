@@ -10,18 +10,33 @@ dnd_cmd = f'{defaults_starter} doNotDisturb -boolean'
 dnd_date_cmd = f'{defaults_starter} doNotDisturbDate -date ' \
                f'"`date -u +\"%Y-%m-%d %H:%M:%S +0000\"`"'
 kill_cmd = 'killall NotificationCenter'
+application_names = ['Microsoft Teams', 'Microsoft Outlook']
 pomodoro_length = 25
 
 
-def enable_dnd():
+def tell_applications(app_list, what_to_tell):
+    for app in app_list:
+        script = f"osascript -e 'tell application \"{app}\"\n" \
+                      f"\t{what_to_tell}\n" \
+                      f"end tell\n'"
+        # print(script)
+
+        # TODO allow for applications from being quit/relaunched
+        #  to be managed by parameters
+        # os.system(script)
+
+
+def enable_dnd():   # maybe start_focus instead?
     os.system(dnd_cmd + ' true')
     os.system(dnd_date_cmd)
     os.system(kill_cmd)
+    tell_applications(application_names, 'quit')
 
 
 def disable_dnd():
     os.system(dnd_cmd + ' false')
     os.system(kill_cmd)
+    tell_applications(application_names, 'activate')
 
 
 def pause_for_focus_time(minutes):
