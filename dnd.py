@@ -12,10 +12,10 @@ dnd_date_cmd = f'{defaults_starter} doNotDisturbDate -date ' \
 kill_cmd = 'killall NotificationCenter'
 
 application_groups = {
-    'default': ['Microsoft Teams', 'Microsoft Outlook'],
+    'default': ['Microsoft Teams', 'Microsoft Outlook', 'Messages'],
     'none': [],
     'email': ['Microsoft Outlook'],
-    'chat': ['Microsoft Teams']
+    'chat': ['Microsoft Teams', 'Messages']
 }
 
 pomodoro_length = 25
@@ -40,7 +40,7 @@ def enable_dnd(apps):   # maybe start_focus instead?
 def disable_dnd(apps):
     os.system(dnd_cmd + ' false')
     os.system(kill_cmd)
-    tell_applications(apps, 'activate')
+    tell_applications(apps, 'run')  # run will get "well-behaved" applications to launch silently https://discussions.apple.com/thread/5283675
 
 
 def pause_for_focus_time(minutes):
@@ -56,12 +56,12 @@ apps = application_groups.get('default')
 if len(sys.argv) > 1:
     args = sys.argv[1:len(sys.argv)]
     for arg in args:
-        print(f'arg is {arg}')
+        # print(f'arg is {arg}')
         if arg.isnumeric():
-            print(f'{arg} is numeric')
+            # print(f'{arg} is numeric')
             input_minutes = int(arg)
         elif application_groups.get(arg) != None:
-            print(f'identified an application group:  {arg}')
+            # print(f'identified an application group:  {arg}')
             apps = application_groups.get(arg)
 
 
