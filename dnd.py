@@ -3,30 +3,68 @@ import os
 import sys
 import time
 
-# TODOs
-# Create a README
-# First you've got to set up a keyboard shortcut for enabling/disabling Do Not Disturb. I could link to the *Overflow article about it.
-# try putting up a notification at the end indicating that DND is over 
-# * https://apple.stackexchange.com/questions/57412/how-can-i-trigger-a-notification-center-notification-from-an-applescript-or-shel
-# * https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/reference/ASLR_cmds.html#//apple_ref/doc/uid/TP40000983-CH216-SW224
-# 
+defaults_starter = 'defaults -currentHost write ' \
+                   '~/Library/Preferences/ByHost/com.apple.notificationcenterui'
 
-toggle_dnd = 'osascript -e "tell application \\"System Events\\" to keystroke \\"d\\" using {command down, option down, control down}"'
-os.system(toggle_dnd)
+dnd_cmd = f'{defaults_starter} doNotDisturb -boolean'
+dnd_date_cmd = f'{defaults_starter} doNotDisturbDate -date ' \
+               f'"`date -u +\"%Y-%m-%d %H:%M:%S +0000\"`"'
+kill_cmd = 'killall NotificationCenter'
 
-pomodoro_length = 25 
+application_groups = {
+    'default': ['Microsoft Teams', 'Microsoft Outlook', 'Messages'],
+    'none': [],
+    'email': ['Microsoft Outlook'],
+    'chat': ['Microsoft Teams', 'Messages']
+}
 
-minutes = 0
+pomodoro_length = 25
 
-if len(sys.argv) == 1:  
-    minutes = pomodoro_length
-else: 
-    minutes = int(sys.argv[1])
 
-minutes_to_sleep = minutes * 60
+def tell_applications(app_list, what_to_tell):
+    for app in app_list:
+        script = f"osascript -e 'tell application \"{app}\"\n" \
+                      f"\t{what_to_tell}\n" \
+                      f"end tell\n'"
+        # print(script)
+        os.system(script)
 
-print(f'DND is enabled; sleeping for {minutes} minutes...')
-time.sleep(minutes_to_sleep)
 
-print('Waking up & switching off DND')
-os.system(toggle_dnd)
+def enable_dnd(apps):   # maybe start_focus instead?
+    os.system(dnd_cmd + ' true')
+    os.system(dnd_date_cmd)
+    os.system(kill_cmd)
+    tell_applications(apps, 'quit')
+
+
+def disable_dnd(apps):
+    os.system(dnd_cmd + ' false')
+    os.system(kill_cmd)
+    tell_applications(apps, 'run')  # run will get "well-behaved" applications to launch silently https://discussions.apple.com/thread/5283675
+
+
+def pause_for_focus_time(minutes):
+    seconds_to_sleep = minutes * 60
+    print(f'DND is enabled; sleeping for {minutes} minutes...')
+    time.sleep(seconds_to_sleep)
+    print('Waking up & switching off DND')
+
+
+input_minutes = pomodoro_length
+apps = application_groups.get('default')
+
+if len(sys.argv) > 1:
+    args = sys.argv[1:len(sys.argv)]
+    for arg in args:
+        # print(f'arg is {arg}')
+        if arg.isnumeric():
+            # print(f'{arg} is numeric')
+            input_minutes = int(arg)
+        elif application_groups.get(arg) != None:
+            # print(f'identified an application group:  {arg}')
+            apps = application_groups.get(arg)
+
+
+enable_dnd(apps)
+pause_for_focus_time(input_minutes)
+disable_dnd(apps)
