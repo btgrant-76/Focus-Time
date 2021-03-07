@@ -41,3 +41,5 @@ Some options to explore:
    * [`display notification` command answer at StackExchange](https://apple.stackexchange.com/questions/57412/how-can-i-trigger-a-notification-center-notification-from-an-applescript-or-shel)
    * [AppleScript `display notification` docs](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/reference/ASLR_cmds.html#//apple_ref/doc/uid/TP40000983-CH216-SW224)
 5. [x] figure out what to do w/TODOs from the original source
+6. [ ] Optionally print countdown details, every 5 minutes
+7. [ ] Support both break based on a minute countdown as well as a count up to a given time
