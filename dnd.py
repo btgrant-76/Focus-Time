@@ -18,6 +18,12 @@ application_groups = {
     'chat': ['Microsoft Teams', 'Messages']
 }
 
+notification_start = "osascript -e 'display notification \""
+notification_end = "\" with title \"Focus Time is Over\"'"
+
+startup_message = "Remember to disable notifications on other devices!"
+end_message = "Remember to enable notifications on other devices!"
+
 pomodoro_length = 25
 
 
@@ -31,6 +37,11 @@ def tell_applications(app_list, what_to_tell):
 
 
 def enable_dnd(apps):   # maybe start_focus instead?
+    if startup_message is not None:
+        os.system(f"{notification_start}{startup_message}\"with title \"Focus Time is Beginning\"'")
+        print(f'{startup_message} Press enter to continue...')
+        input()
+
     os.system(dnd_cmd + ' true')
     os.system(dnd_date_cmd)
     os.system(kill_cmd)
@@ -40,7 +51,10 @@ def enable_dnd(apps):   # maybe start_focus instead?
 def disable_dnd(apps):
     os.system(dnd_cmd + ' false')
     os.system(kill_cmd)
-    tell_applications(apps, 'run')  # run will get "well-behaved" applications to launch silently https://discussions.apple.com/thread/5283675
+
+    # run will get "well-behaved" applications to launch silently
+    # https://discussions.apple.com/thread/5283675
+    tell_applications(apps, 'run')
 
 
 def pause_for_focus_time(minutes):
@@ -48,6 +62,12 @@ def pause_for_focus_time(minutes):
     print(f'DND is enabled; sleeping for {minutes} minutes...')
     time.sleep(seconds_to_sleep)
     print('Waking up & switching off DND')
+
+    if end_message is not None:
+        os.system(f"{notification_start}{end_message}{notification_end}")
+        print(end_message)
+    else:
+        os.system(f"{notification_start}{notification_end}")
 
 
 input_minutes = pomodoro_length
@@ -60,7 +80,7 @@ if len(sys.argv) > 1:
         if arg.isnumeric():
             # print(f'{arg} is numeric')
             input_minutes = int(arg)
-        elif application_groups.get(arg) != None:
+        elif application_groups.get(arg):
             # print(f'identified an application group:  {arg}')
             apps = application_groups.get(arg)
 
