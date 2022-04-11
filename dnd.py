@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+import configparser
 
 defaults_starter = 'defaults -currentHost write ' \
                    '~/Library/Preferences/ByHost/com.apple.notificationcenterui'
@@ -12,10 +13,10 @@ dnd_date_cmd = f'{defaults_starter} doNotDisturbDate -date ' \
 kill_cmd = 'killall NotificationCenter'
 
 application_groups = {
-    'default': ['Microsoft Teams', 'Microsoft Outlook', 'Messages'],
+    'default': ['Microsoft Teams', 'Microsoft Outlook', 'Messages', 'Discord'],
     'none': [],
     'email': ['Microsoft Outlook'],
-    'chat': ['Microsoft Teams', 'Messages']
+    'chat': ['Microsoft Teams', 'Messages', 'Discord']
 }
 
 notification_start = "osascript -e 'display notification \""
@@ -85,6 +86,35 @@ if len(sys.argv) > 1:
             apps = application_groups.get(arg)
 
 
+# TODO what if the file isn't there?
+#   write defaults
+#   re-read
+# TODO what if it can't be read/determined to exist?
+#   report a message; will an exception be thrown?
+#   exit
+
 enable_dnd(apps)
 pause_for_focus_time(input_minutes)
 disable_dnd(apps)
+
+
+# import pwd
+from getpass import getuser
+from pwd import getpwnam
+
+
+class Config:
+
+    def __init__(self):
+        config_file = f'{getpwnam(getuser())[5]}/.focustime.ini'
+        print(config_file)
+        config_parser = configparser.ConfigParser()
+        config_parser.read(config_file)
+        print(config_parser)
+        stuff = config_parser.get('STUFF')
+        print(f'STUFF: {stuff}')
+        # print(getpass.getuser())
+        pass
+
+
+# Config()
